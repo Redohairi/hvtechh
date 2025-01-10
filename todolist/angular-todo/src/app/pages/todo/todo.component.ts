@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormGroup, FormControl, Validators,ReactiveFormsModule } from '@angular/forms';
-import { Tarefa } from  '/home/davi/aulashv/todolist/angular-todo/src/app/models/tarefas.models';
-import { TarefaService } from '/home/davi/aulashv/todolist/angular-todo/src/app/services/tarefa.service';
+import { Tarefa } from  '../../models/tarefas.models';
+import { TarefaService } from '../../services/tarefa.service';
 import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({

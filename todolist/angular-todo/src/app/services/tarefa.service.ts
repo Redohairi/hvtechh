@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { Tarefa } from '/home/davi/aulashv/todolist/angular-todo/src/app/models/tarefas.models';
+import { Tarefa } from '../models/tarefas.models';
 
 @Injectable({
     providedIn: 'root'
