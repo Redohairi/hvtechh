@@ -4,6 +4,5 @@ export interface Product {
     description: string;
     price: number;
     stock: number;
-    // se tiver imagem, roles, etc., pode adicionar aqui
   }
   
