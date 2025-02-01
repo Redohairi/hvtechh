@@ -7,7 +7,6 @@ import { Product } from '../models/product.model';
   providedIn: 'root'
 })
 export class ProductService {
-  // Ajuste para a URL da sua API NestJS
   private apiUrl = 'http://localhost:3000/products'; 
 
   constructor(private http: HttpClient) {}
