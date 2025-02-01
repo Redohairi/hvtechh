@@ -1,9 +1,8 @@
 <h2>Lista de Produtos</h2>
 
-<!-- Filtro simples -->
+
 <input type="text" [(ngModel)]="filterText" placeholder="Filtrar..." (input)="applyFilter()" />
 
-<!-- Tabela de produtos -->
 <table>
   <thead>
     <tr>
@@ -12,10 +11,10 @@
       <th>Preço</th>
       <th>Estoque</th>
       <th>Ações</th>
+
     </tr>
   </thead>
   <tbody>
-    <!-- Utilize 'paginatedProducts' em vez de 'filteredProducts' -->
     <tr *ngFor="let p of paginatedProducts">
       <td>{{ p.name }}</td>
       <td>{{ p.description }}</td>

@@ -7,7 +7,7 @@ import { Router, RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-product-list',
-  templateUrl: './product-list.component.html',  // Usando template externo
+  templateUrl: './product-list.component.html',  
   imports: [CommonModule, FormsModule, RouterLink]
 })
 export class ProductListComponent implements OnInit {
@@ -15,9 +15,9 @@ export class ProductListComponent implements OnInit {
   filteredProducts: Product[] = [];
   filterText = '';
 
-  // Propriedades para paginação:
+  
   currentPage: number = 1;
-  itemsPerPage: number = 5; // Ajuste conforme necessário
+  itemsPerPage: number = 5; 
 
   constructor(private productService: ProductService, private router: Router) {}
 
@@ -30,7 +30,7 @@ export class ProductListComponent implements OnInit {
       next: (data) => {
         this.products = data;
         this.filteredProducts = data;
-        this.currentPage = 1; // Reseta para a primeira página
+        this.currentPage = 1; 
       },
       error: (err) => {
         console.error('Erro ao listar produtos', err);
@@ -43,7 +43,7 @@ export class ProductListComponent implements OnInit {
       p.name.toLowerCase().includes(this.filterText.toLowerCase()) ||
       p.description.toLowerCase().includes(this.filterText.toLowerCase())
     );
-    this.currentPage = 1; // Reseta para a primeira página ao filtrar
+    this.currentPage = 1;
   }
 
   onDelete(id: string) {
@@ -59,7 +59,7 @@ export class ProductListComponent implements OnInit {
     }
   }
 
-  // Retorna somente os produtos da página atual
+
   get paginatedProducts(): Product[] {
     const startIndex = (this.currentPage - 1) * this.itemsPerPage;
     return this.filteredProducts.slice(startIndex, startIndex + this.itemsPerPage);
