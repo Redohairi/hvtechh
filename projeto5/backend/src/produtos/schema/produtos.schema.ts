@@ -18,7 +18,6 @@ export class Product {
   @Prop({ required: true })
   stock: number;
 
-  // Caso queira adicionar campo de data de criação, por exemplo
   @Prop({ default: Date.now })
   createdAt: Date;
 }
