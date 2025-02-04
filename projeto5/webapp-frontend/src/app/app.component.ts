@@ -6,7 +6,7 @@ import { RouterOutlet } from '@angular/router';
   imports: [RouterOutlet],
   selector: 'app-root',
   template: `
-    <h1>Meu WebApp Angular - CRUD de Produtos</h1>
+    <h1>CRUD de Produtos</h1>
     <router-outlet></router-outlet>
   `
 })

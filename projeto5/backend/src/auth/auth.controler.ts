@@ -1,6 +1,6 @@
 import { Controller, Post, UseGuards, Request, Body } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { LocalAuthGuard } from './ local-auth.guard'; // ou crie um local-auth.guard.ts
+import { LocalAuthGuard } from './local-auth.guard'; // ou crie um local-auth.guard.ts
 import { UsersService } from '../users/user.service';
 import { UserRole } from 'src/users/schemas/user.schema';
 
@@ -21,10 +21,10 @@ export class AuthController {
   }
 
   // Rota para login
-  @UseGuards(LocalAuthGuard) // Usa local.strategy.ts
+  @UseGuards(LocalAuthGuard) 
   @Post('login')
   async login(@Request() req) {
-    // Se passou pelo guard, req.user está populado
+
     return this.authService.login(req.user);
   }
 }

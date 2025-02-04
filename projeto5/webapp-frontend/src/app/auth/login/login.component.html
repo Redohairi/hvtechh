@@ -1,0 +1,14 @@
+<h2>Login</h2>
+
+<div *ngIf="errorMsg" style="color:red">{{ errorMsg }}</div>
+
+<div>
+  <label>Usuário:</label>
+  <input [(ngModel)]="username" />
+</div>
+<div>
+  <label>Senha:</label>
+  <input [(ngModel)]="password" type="password" />
+</div>
+
+<button (click)="onLogin()">Entrar</button>

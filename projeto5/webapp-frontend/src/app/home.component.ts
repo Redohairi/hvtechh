@@ -6,7 +6,7 @@ import { RouterModule } from '@angular/router';
   standalone: true,
   imports: [RouterModule],
   template: `
-    <h1>Welcome to the Home Page</h1>
+    <h1>Landing page!</h1>
     <button [routerLink]="['/products']">CRUD</button>
   `
 })
