@@ -11,9 +11,6 @@ import {
     UseGuards,
   } from '@nestjs/common';
   import { ProductsService } from './produtos.services';
-  import { CreateProductDto } from './dto/create-produtos.dto';
-  import { UpdateProductDto } from './dto/update-produtos.dto';
-  import {Product} from './schema/produtos.schema';
   import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
   import { RolesGuard } from 'src/auth/guards/roles.guard';
   import { Roles } from 'src/auth/decorators/roles.decorator';
