@@ -8,43 +8,45 @@ import {
     Delete,
     HttpStatus,
     HttpCode,
+    UseGuards,
   } from '@nestjs/common';
   import { ProductsService } from './produtos.services';
   import { CreateProductDto } from './dto/create-produtos.dto';
   import { UpdateProductDto } from './dto/update-produtos.dto';
   import {Product} from './schema/produtos.schema';
+  import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+  import { RolesGuard } from 'src/auth/guards/roles.guard';
+  import { Roles } from 'src/auth/decorators/roles.decorator';
+  import { UserRole } from 'src/users/schemas/user.schema';
+  
+
   
   @Controller('products')
-  export class ProductsController {
-    constructor(private readonly productsService: ProductsService) {}
-  
-    @Post()
-    @HttpCode(HttpStatus.CREATED)
-    create(@Body() createProductDto: CreateProductDto): Promise<Product> {
-      return this.productsService.create(createProductDto);
-    }
-  
-    @Get()
-    findAll(): Promise<Product[]> {
-      return this.productsService.findAll();
-    }
-  
-    @Get(':id')
-    findOne(@Param('id') id: string): Promise<Product> {
-      return this.productsService.findOne(id);
-    }
-  
-    @Put(':id')
-    update(
-      @Param('id') id: string,
-      @Body() updateProductDto: UpdateProductDto,
-    ): Promise<Product> {
-      return this.productsService.update(id, updateProductDto);
-    }
-  
-    @Delete(':id')
-    remove(@Param('id') id: string): Promise<Product> {
-      return this.productsService.remove(id);
-    }
+@UseGuards(JwtAuthGuard, RolesGuard) // ex.: todos métodos precisam do JWT e Roles
+export class ProductsController {
+  constructor(private readonly productsService: ProductsService) {}
+
+  @Get()
+  findAll() {
+    // ... Qualquer usuário logado
+    return this.productsService.findAll();
   }
-  
+
+  @Post()
+  @Roles(UserRole.ADMIN) // apenas admin
+  create(@Body() dto: any) {
+    return this.productsService.create(dto);
+  }
+
+  @Put(':id')
+  @Roles(UserRole.ADMIN)
+  update(@Param('id') id: string, @Body() dto: any) {
+    return this.productsService.update(id, dto);
+  }
+
+  @Delete(':id')
+  @Roles(UserRole.ADMIN)
+  remove(@Param('id') id: string) {
+    return this.productsService.remove(id);
+  }
+}

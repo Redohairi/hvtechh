@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 
-// Interface do Mongoose para Product
+
 export type ProductDocument = Product & Document;
 
 @Schema()
