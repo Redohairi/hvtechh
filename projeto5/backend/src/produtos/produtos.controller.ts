@@ -24,6 +24,7 @@ export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   @Get()
+  @Roles(UserRole.USER, UserRole.ADMIN)
   findAll() {
     // ... Qualquer usuário logado
     return this.productsService.findAll();

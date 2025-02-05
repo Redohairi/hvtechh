@@ -11,5 +11,5 @@ export const appRoutes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'products/new', component: ProductFormComponent, canActivate: [AuthGuard] },
   { path: 'products/edit/:id', component: ProductFormComponent, canActivate: [AuthGuard] },
-  { path: 'products', component: ProductListComponent, pathMatch: 'full' },
+  { path: 'products', component: ProductListComponent, pathMatch: 'full',canActivate: [AuthGuard] },
 ];
