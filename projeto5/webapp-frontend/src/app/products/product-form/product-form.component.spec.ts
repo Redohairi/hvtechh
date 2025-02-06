@@ -1,23 +1,53 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
+import { Injector, runInInjectionContext } from '@angular/core';
+import { HttpRequest, HttpResponse, HttpHandlerFn } from '@angular/common/http';
+import { of } from 'rxjs';
+import { authInterceptor } from '../../auth/auth.interceptor';
+import { AuthService } from '../../auth/auth.service';
 
-import { ProductFormComponent } from './product-form.component';
+describe('AuthInterceptor (functional)', () => {
+  let fakeAuthService: jasmine.SpyObj<AuthService>;
+  let injector: Injector;
 
-describe('ProductFormComponent', () => {
-  let component: ProductFormComponent;
-  let fixture: ComponentFixture<ProductFormComponent>;
-
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [ProductFormComponent]
-    })
-    .compileComponents();
-
-    fixture = TestBed.createComponent(ProductFormComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
+  beforeEach(() => {
+    fakeAuthService = jasmine.createSpyObj('AuthService', ['getToken']);
+    TestBed.configureTestingModule({
+      providers: [{ provide: AuthService, useValue: fakeAuthService }]
+    });
+    injector = TestBed.inject(Injector);
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
+  it('should add Authorization header when token exists', (done) => {
+    fakeAuthService.getToken.and.returnValue('fake-token');
+
+    const request = new HttpRequest('GET', '/test');
+    const next: HttpHandlerFn = (req) => {
+      expect(req.headers.get('Authorization')).toBe('Bearer fake-token');
+      return of(new HttpResponse({ status: 200 }));
+    };
+
+    runInInjectionContext(injector, () => {
+      authInterceptor(request, next).subscribe(response => {
+        expect(response).toBeTruthy();
+        done();
+      });
+    });
+  });
+
+  it('should not add Authorization header when token is null', (done) => {
+    fakeAuthService.getToken.and.returnValue(null);
+
+    const request = new HttpRequest('GET', '/test');
+    const next: HttpHandlerFn = (req) => {
+      expect(req.headers.has('Authorization')).toBeFalse();
+      return of(new HttpResponse({ status: 200 }));
+    };
+
+    runInInjectionContext(injector, () => {
+      authInterceptor(request, next).subscribe(response => {
+        expect(response).toBeTruthy();
+        done();
+      });
+    });
   });
 });
