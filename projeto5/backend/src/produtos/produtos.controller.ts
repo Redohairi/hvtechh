@@ -29,7 +29,7 @@ export class ProductsController {
     // ... Qualquer usuário logado
     return this.productsService.findAll();
   }
-
+  @HttpCode(HttpStatus.CREATED)
   @Post()
   @Roles(UserRole.ADMIN) // apenas admin
   create(@Body() dto: any) {
