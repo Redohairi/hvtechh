@@ -1,14 +1,17 @@
-// test/products.e2e-spec.ts
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, HttpStatus } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
+import { getConnectionToken } from '@nestjs/mongoose';
+import { Connection } from 'mongoose';
 
 describe('ProductsController (e2e)', () => {
   let app: INestApplication;
   let server: any;
-  let userToken: string; // se precisar de token do USER
-  let adminToken: string; // se precisar de token do ADMIN
+  let connection: Connection;
+
+  let userToken: string;
+  let adminToken: string;
   let createdProductId: string;
 
   beforeAll(async () => {
@@ -20,31 +23,34 @@ describe('ProductsController (e2e)', () => {
     await app.init();
     server = app.getHttpServer();
 
-    // Você pode criar alguns usuários e obter tokens para teste
-    // Por exemplo, cria um user e um admin, e guarda o token
+    // Limpa todo o DB para evitar duplicidade e resíduos
+    connection = moduleFixture.get<Connection>(getConnectionToken());
+    await connection.dropDatabase();
 
-    // 1) Cria user
+    // 1) Cria user "normalUser"
     await request(server)
       .post('/auth/register')
-      .send({ username: 'normalUser', password: '123', role: 'user' });
+      .send({ username: 'normalUser', password: '123', role: 'user' })
+      .expect(HttpStatus.CREATED);
 
-    // 2) Loga user e armazena token
+    // 2) Loga user
     const userLogin = await request(server)
       .post('/auth/login')
-      .send({ username: 'normalUser', password: '123' });
-
+      .send({ username: 'normalUser', password: '123' })
+      .expect(HttpStatus.CREATED);
     userToken = userLogin.body.access_token;
 
-    // 3) Cria admin
+    // 3) Cria admin "adminUser"
     await request(server)
       .post('/auth/register')
-      .send({ username: 'adminUser', password: '123', role: 'admin' });
+      .send({ username: 'adminUser', password: '123', role: 'admin' })
+      .expect(HttpStatus.CREATED);
 
-    // 4) Loga admin e armazena token
+    // 4) Loga admin
     const adminLogin = await request(server)
       .post('/auth/login')
-      .send({ username: 'adminUser', password: '123' });
-
+      .send({ username: 'adminUser', password: '123' })
+      .expect(HttpStatus.CREATED);
     adminToken = adminLogin.body.access_token;
   });
 
@@ -55,36 +61,39 @@ describe('ProductsController (e2e)', () => {
   it('/products (GET) - deve falhar se não tiver token', async () => {
     return request(server)
       .get('/products')
-      .expect(401);
+      .expect(HttpStatus.UNAUTHORIZED);
   });
 
-  it('/products (GET) - deve retornar lista de produtos se tiver token do USER', async () => {
+  it('/products (GET) - deve retornar lista se tiver token do USER', async () => {
     return request(server)
       .get('/products')
       .set('Authorization', `Bearer ${userToken}`)
-      .expect(200)
+      .expect(HttpStatus.OK)
       .then((res) => {
         expect(Array.isArray(res.body)).toBe(true);
       });
   });
 
-  it('/products (POST) - deve falhar se USER tentar criar um produto (403)', async () => {
+  it('/products (POST) - deve falhar se USER tentar criar (403)', async () => {
     return request(server)
       .post('/products')
       .set('Authorization', `Bearer ${userToken}`)
-      .send({ name: 'ProductX', price: 999 })
-      .expect(403); // pois o guard RolesGuard deve bloquear
+      // stock e description obrigatórios (seu schema)
+      .send({ name: 'ProductX', price: 999, stock: 10, description: 'desc X' })
+      .expect(HttpStatus.FORBIDDEN);
   });
 
   it('/products (POST) - deve criar produto se for ADMIN', async () => {
     return request(server)
       .post('/products')
       .set('Authorization', `Bearer ${adminToken}`)
-      .send({ name: 'ProductX', price: 999 })
-      .expect(201)
+      // Envie todos os campos obrigatórios
+      .send({ name: 'ProductX', price: 999, stock: 10, description: 'descX' })
+      .expect(HttpStatus.CREATED)
       .then((res) => {
-        createdProductId = res.body._id;  // suponto que retorne _id
+        createdProductId = res.body._id;
         expect(res.body.name).toBe('ProductX');
+        expect(res.body.price).toBe(999);
       });
   });
 
@@ -92,8 +101,8 @@ describe('ProductsController (e2e)', () => {
     return request(server)
       .put(`/products/${createdProductId}`)
       .set('Authorization', `Bearer ${adminToken}`)
-      .send({ name: 'ProductY', price: 888 })
-      .expect(200)
+      .send({ name: 'ProductY', price: 888, stock: 999, description: 'descY' })
+      .expect(HttpStatus.OK)
       .then((res) => {
         expect(res.body.name).toBe('ProductY');
         expect(res.body.price).toBe(888);
@@ -104,9 +113,10 @@ describe('ProductsController (e2e)', () => {
     return request(server)
       .delete(`/products/${createdProductId}`)
       .set('Authorization', `Bearer ${adminToken}`)
-      .expect(200)
+      .expect(HttpStatus.OK)
       .then((res) => {
-        expect(res.body).toMatchObject({ acknowledged: true });
+        expect(res.body._id).toBe(createdProductId);
+        expect(res.body.name).toBe('ProductY');
       });
   });
 });
