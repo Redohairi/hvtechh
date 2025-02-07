@@ -1,1 +1,26 @@
-<p>product-form works!</p>
+<h2>{{ isEdit ? 'Editar Produto' : 'Novo Produto' }}</h2>
+<form [formGroup]="productForm" (ngSubmit)="onSubmit()">
+  <label for="name">Nome</label>
+  <input id="name" formControlName="name" type="text" />
+
+  <label for="description">Descrição</label>
+  <input id="description" formControlName="description" type="text" />
+
+  <label for="price">Preço</label>
+  <input id="price" formControlName="price" type="number" />
+
+  <label for="stock">Estoque</label>
+  <input id="stock" formControlName="stock" type="number" />
+
+  <!-- Input para seleção de imagem -->
+  <label for="image">Imagem</label>
+  <input id="image" type="file" (change)="onFileSelected($event)" />
+
+  <!-- Pré-visualização da imagem -->
+  <div *ngIf="previewImage">
+    <p>Pré-visualização:</p>
+    <img [src]="previewImage" width="150" alt="Pré-visualização da imagem" />
+  </div>
+
+  <button type="submit">{{ isEdit ? 'Atualizar' : 'Criar' }}</button>
+</form>

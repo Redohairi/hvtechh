@@ -6,32 +6,18 @@ import { Product } from '../../models/product.model';
 import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
+  selector: 'app-product-form',
+  templateUrl: './product-form.component.html', // Aponta para o arquivo externo de HTML
+  styleUrls: ['./product-form.component.css'],  // Caso tenha um arquivo de CSS
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
-  selector: 'app-product-form',
-  template: `
-    <h2>{{ isEdit ? 'Editar Produto' : 'Novo Produto' }}</h2>
-    <form [formGroup]="productForm" (ngSubmit)="onSubmit()">
-      <label for="name">Nome</label>
-      <input id="name" formControlName="name" type="text" />
-
-      <label for="description">Descrição</label>
-      <input id="description" formControlName="description" type="text" />
-
-      <label for="price">Preço</label>
-      <input id="price" formControlName="price" type="number" />
-
-      <label for="stock">Estoque</label>
-      <input id="stock" formControlName="stock" type="number" />
-
-      <button type="submit">{{ isEdit ? 'Atualizar' : 'Criar' }}</button>
-    </form>
-  `
 })
 export class ProductFormComponent implements OnInit {
   productForm!: FormGroup;
   isEdit = false;
   productId: string | null = null;
+  selectedFile: File | null = null;
+  previewImage: string | null = null;
 
   constructor(
     private productService: ProductService,
@@ -40,15 +26,14 @@ export class ProductFormComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // Criar o form
     this.productForm = new FormGroup({
       name: new FormControl('', [Validators.required]),
       description: new FormControl('', [Validators.required]),
       price: new FormControl(0, [Validators.required, Validators.min(0)]),
-      stock: new FormControl(0, [Validators.required, Validators.min(0)])
+      stock: new FormControl(0, [Validators.required, Validators.min(0)]),
     });
 
-    // Verificar se está editando (rota: /products/edit/:id)
+    // Verifica se está em modo de edição (rota: /products/edit/:id)
     this.route.paramMap.subscribe(params => {
       this.productId = params.get('id');
       if (this.productId) {
@@ -67,14 +52,26 @@ export class ProductFormComponent implements OnInit {
           price: product.price,
           stock: product.stock
         });
+        this.previewImage = product.imageUrl || null;
       },
-      error: (err) => {
-        console.error('Erro ao carregar produto', err);
-      }
+      error: (err) => console.error('Erro ao carregar produto', err)
     });
   }
 
-  onSubmit() {
+  onFileSelected(event: any): void {
+    const file: File = event.target.files[0];
+    if (file) {
+      this.selectedFile = file;
+      // Gerar pré-visualização da imagem
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.previewImage = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  onSubmit(): void {
     if (this.productForm.invalid) {
       return;
     }
@@ -82,24 +79,52 @@ export class ProductFormComponent implements OnInit {
     const productData: Product = this.productForm.value;
 
     if (this.isEdit && this.productId) {
+      // Atualiza o produto
       this.productService.updateProduct(this.productId, productData).subscribe({
         next: () => {
-          alert('Produto atualizado com sucesso!');
-          this.router.navigate(['/products']);
+        
+          if (this.selectedFile) {
+            this.productService.uploadImage(this.productId!, this.selectedFile).subscribe({
+              next: () => {
+                alert('Produto atualizado com imagem!');
+                this.router.navigate(['/products']);
+              },
+              error: (err) => {
+                console.error('Erro ao enviar imagem', err);
+                alert('Produto atualizado, mas houve erro no upload da imagem.');
+                this.router.navigate(['/products']);
+              }
+            });
+          } else {
+            alert('Produto atualizado com sucesso!');
+            this.router.navigate(['/products']);
+          }
         },
-        error: (err) => {
-          console.error('Erro ao atualizar produto', err);
-        }
+        error: (err) => console.error('Erro ao atualizar produto', err)
       });
     } else {
+      // Cria o produto primeiro
       this.productService.createProduct(productData).subscribe({
-        next: () => {
-          alert('Produto criado com sucesso!');
-          this.router.navigate(['/products']);
+        next: (createdProduct) => {
+          // Se houver imagem para upload, faz o upload com o ID retornado
+          if (this.selectedFile && createdProduct._id) {
+            this.productService.uploadImage(createdProduct._id, this.selectedFile).subscribe({
+              next: () => {
+                alert('Produto criado com imagem!');
+                this.router.navigate(['/products']);
+              },
+              error: (err) => {
+                console.error('Erro ao enviar imagem', err);
+                alert('Produto criado, mas houve erro no upload da imagem.');
+                this.router.navigate(['/products']);
+              }
+            });
+          } else {
+            alert('Produto criado com sucesso!');
+            this.router.navigate(['/products']);
+          }
         },
-        error: (err) => {
-          console.error('Erro ao criar produto', err);
-        }
+        error: (err) => console.error('Erro ao criar produto', err)
       });
     }
   }

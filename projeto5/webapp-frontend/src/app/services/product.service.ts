@@ -30,4 +30,11 @@ export class ProductService {
   deleteProduct(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
+
+  // Método para upload de imagem
+  uploadImage(productId: string, file: File): Observable<Product> {
+    const formData = new FormData();
+    formData.append('image', file);
+    return this.http.post<Product>(`${this.apiUrl}/upload/${productId}`, formData);
+  }
 }

@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import {Product, ProductDocument} from './schema/produtos.schema';
+import { Product, ProductDocument } from './schema/produtos.schema';
 import { CreateProductDto } from './dto/create-produtos.dto';
 import { UpdateProductDto } from './dto/update-produtos.dto';
 
@@ -47,5 +47,13 @@ export class ProductsService {
       throw new NotFoundException(`Product #${id} not found`);
     }
     return deletedProduct;
+  }
+
+  async updateImage(id: string, imageUrl: string): Promise<Product> {
+    const produto = await this.productModel.findByIdAndUpdate(id, { imageUrl }, { new: true });
+    if (!produto) {
+      throw new NotFoundException(`Produto ${id} não encontrado`);
+    }
+    return produto;
   }
 }

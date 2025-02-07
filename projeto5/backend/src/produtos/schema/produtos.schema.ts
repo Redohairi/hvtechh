@@ -1,7 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 
-
 export type ProductDocument = Product & Document;
 
 @Schema()
@@ -20,7 +19,9 @@ export class Product {
 
   @Prop({ default: Date.now })
   createdAt: Date;
+
+  @Prop()
+  imageUrl?: string;
 }
 
-// Cria o schema a partir da classe Product
 export const ProductSchema = SchemaFactory.createForClass(Product);

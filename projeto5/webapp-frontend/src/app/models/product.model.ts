@@ -1,8 +1,8 @@
 export interface Product {
-    _id?: string;         // ID vindo do Mongo
-    name: string;
-    description: string;
-    price: number;
-    stock: number;
-  }
-  
+  _id?: string;         
+  name: string;
+  description: string;
+  price: number;
+  stock: number;
+  imageUrl?: string;    
+}
